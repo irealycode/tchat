@@ -18,7 +18,7 @@ except getopt.GetoptError:
   sys.exit(2)
 for opt, arg in opts:
   if opt == '-h':
-     print ('test.py -H <HOST> -P <PORT>')
+     print ('server.py -H <HOST> -P <PORT>')
      sys.exit()
   elif opt in ("-H", "--hfile"):
      host0 = arg
