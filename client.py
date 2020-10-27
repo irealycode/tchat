@@ -2,6 +2,7 @@ import socket
 import select
 import errno
 import sys, getopt
+from colorama import Fore, Back, Style
 
 HEADER_LENGTH = 10
 passcnnect = False
@@ -11,7 +12,7 @@ argv = sys.argv[1:]
 try:
   opts, args = getopt.getopt(argv,"hH:P:",["hfile=","pfile="])
 except getopt.GetoptError:
-  print ('command not found ??')
+  print (Fore.RED + 'command not found ??')
   sys.exit(2)
 for opt, arg in opts:
   if opt == '-h':
@@ -34,7 +35,7 @@ client_socket.send(username_header + username)
 
 
 while True:
-    message = input(f'[-{my_username}-] : ')
+    message = input(Fore.WHITE +'[-'+ Fore.BLUE + f'{my_username}' + Fore.WHITE + '-] : ')
     if message == 'exit -y':
         sys.exit()
     if message:
@@ -53,7 +54,7 @@ while True:
             message_header = client_socket.recv(HEADER_LENGTH)
             message_length = int(message_header.decode('utf-8').strip())
             message = client_socket.recv(message_length).decode('utf-8')
-            print(f'[-{username}-] : {message}')
+            print(Fore.WHITE + '[-' + Fore.GREEN + f'{username}' + Fore.WHITE + '-] : ' + Fore.YELLOW + f'{message}')
 
     except IOError as e:
         if e.errno != errno.EAGAIN and e.errno != errno.EWOULDBLOCK:
@@ -62,5 +63,5 @@ while True:
         continue
 
     except Exception as e:
-        print('Reading error: '.format(str(e)))
+        print('error')
         sys.exit()
