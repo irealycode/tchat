@@ -2,7 +2,6 @@ import socket
 import select
 import sys, getopt
 
-
 HEADER_LENGTH = 10
 #cammand specify
 
@@ -40,7 +39,7 @@ server_socket.listen()
 sockets_list = [server_socket]
 clients = {}
 
-print('Listening on ', host0 ,' : ', host1, '...')
+print('Listening on ', host0 ,':', host1, '...')
 
 def receive_message(client_socket):
         try:
