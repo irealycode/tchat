@@ -12,3 +12,4 @@ output:
   python server.py -H [HOST] -P [PORT]
  output:
   username: [enter your username here]
+  room password: [enter the room's password]
