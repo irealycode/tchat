@@ -14,6 +14,7 @@ try:
   opts, args = getopt.getopt(argv,"hH:P:",["hfile=","pfile="])
 except getopt.GetoptError:
   print (Fore.RED + 'command not found ??')
+  print ('-h for help')
   sys.exit(2)
 for opt, arg in opts:
   if opt == '-h':
