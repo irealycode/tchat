@@ -1,7 +1,7 @@
 import socket
 import select
 import sys, getopt
-
+from threading import Thread
 HEADER_LENGTH = 10
 #cammand specify
 
@@ -12,19 +12,20 @@ host1 = ''
 password = ''
 argv = sys.argv[1:]
 try:
-  opts, args = getopt.getopt(argv,"hH:P:s:",["hfile=","pfile=","sfile"])
+  opts, args = getopt.getopt(argv,"hH:P:S:",["hfile=","pfile=","sfile"])
 except getopt.GetoptError:
   print ('command not found ??')
+  print ('-h for help')
   sys.exit(2)
 for opt, arg in opts:
   if opt == '-h':
-     print ('server.py -H <HOST> -P <PORT>')
+     print ('server.py -H <HOST> -P <PORT> -S <PASSWORD>')
      sys.exit()
   elif opt in ("-H", "--hfile"):
      host0 = arg
   elif opt in ("-P", "--pfile"):
      host1 = arg
-  elif opt in ("-s", "--sfile"):
+  elif opt in ("-S", "--sfile"):
      password = arg
 
 
@@ -39,7 +40,15 @@ server_socket.listen()
 sockets_list = [server_socket]
 clients = {}
 
-print('Listening on ', host0 ,':', host1, '...')
+print('Listening on ',host0 ,':',host1, '...')
+
+def send_message():
+    while True:
+        client, client_address = server_socket.accept()
+        client.send(password.encode("utf8"))
+        ACCEPT_THREAD = Thread(target=chat).start
+
+
 
 def receive_message(client_socket):
         try:
@@ -53,35 +62,39 @@ def receive_message(client_socket):
         except:
             return False
 
-while True:
-    read_sockets, _, exception_sockets = select.select(sockets_list, [], sockets_list)
-    for notified_socket in read_sockets:
-        if notified_socket == server_socket:
-            client_socket, client_address = server_socket.accept()
-            user = receive_message(client_socket)
-            if user is False:
-                continue
-            sockets_list.append(client_socket)
-            clients[client_socket] = user
+def chat():
+    while True:
+        read_sockets, _, exception_sockets = select.select(sockets_list, [], sockets_list)
+        for notified_socket in read_sockets:
+            if notified_socket == server_socket:
+                client_socket, client_address = server_socket.accept()
+                user = receive_message(client_socket)
+                if user is False:
+                    continue
+                sockets_list.append(client_socket)
+                clients[client_socket] = user
 
-            print('new connection from {}:{}, username: {}'.format(*client_address, user['data'].decode('utf-8')))
+                print('new connection from {}:{}, username: {}'.format(*client_address, user['data'].decode('utf-8')))
 
-        else:
-            message = receive_message(notified_socket)
-            if message is False:
-                print('Closed connection from: {}'.format(clients[notified_socket]['data'].decode('utf-8')))
-                sockets_list.remove(notified_socket)
-                del clients[notified_socket]
+            else:
+                message = receive_message(notified_socket)
+                if message is False:
+                    print('Closed connection from: {}'.format(clients[notified_socket]['data'].decode('utf-8')))
+                    sockets_list.remove(notified_socket)
+                    del clients[notified_socket]
 
-                continue
-            user = clients[notified_socket]
+                    continue
+                user = clients[notified_socket]
 
-            print(f'Message from {user["data"].decode("utf-8")}: {message["data"].decode("utf-8")}')
-            for client_socket in clients:
-                if client_socket != notified_socket:
+                print(f'Message from {user["data"].decode("utf-8")}: {message["data"].decode("utf-8")}')
+                for client_socket in clients:
+                    if client_socket != notified_socket:
 
-                    client_socket.send(user['header'] + user['data'] + message['header'] + message['data'])
+                        client_socket.send(user['header'] + user['data'] + message['header'] + message['data'])
 
-    for notified_socket in exception_sockets:
-        sockets_list.remove(notified_socket)
-        del clients[notified_socket]
+        for notified_socket in exception_sockets:
+            sockets_list.remove(notified_socket)
+            del clients[notified_socket]
+if __name__ == "__main__":
+    ACCEPT_THREAD = Thread(target=send_message)
+    ACCEPT_THREAD.start()
