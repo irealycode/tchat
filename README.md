@@ -2,7 +2,7 @@
 python socket chat
 
 first:
-  python server.py -H [HOST] -P [PORT]
+  python server.py -H [HOST] -P [PORT] -S [PASSWORD]
 output:
   Listening on  [HOST] : [PORT] ...
 
