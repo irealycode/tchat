@@ -41,16 +41,21 @@ def receive():
             msg = client_socket.recv(1024).decode("utf8")
             passw = input("room password: ")
             if passw == msg:
-                receive_thread = Thread(target=chatS).start()
+                print(Fore.LIGHTGREEN_EX + 'loged in as ' + my_username + ' seccessfully.')
+                chatS()
             elif passw != msg:
-                print("nope!")
+                print("incorrect password!")
+                break
         except OSError: 
+            print("ok1")
             break
+
 
 def chatS():
     while True:
-        message = input(Fore.WHITE +'[-'+ Fore.BLUE + f'{my_username}' + Fore.WHITE + '-] : ')
+        message = input(Fore.WHITE +'[-'+ Fore.CYAN + f'{my_username}' + Fore.WHITE + '-] : ')
         if message == 'exit -y':
+            print("goodbye.")
             sys.exit()
         if message:
             message = message.encode('utf-8')
@@ -79,6 +84,9 @@ def chatS():
         except Exception as e:
             print('error')
             sys.exit()
+
+
+
 
 receive_thread = Thread(target=receive)
 receive_thread.start()
