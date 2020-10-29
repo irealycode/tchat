@@ -30,10 +30,7 @@ PORT = int(host1)
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client_socket.connect((IP, PORT))
 client_socket.setblocking(False)
-my_username = input("username: ")
-username = my_username.encode('utf-8')
-username_header = f"{len(username):<{HEADER_LENGTH}}".encode('utf-8')
-client_socket.send(username_header + username)
+
 
 def receive():
     while True:
@@ -41,10 +38,11 @@ def receive():
             msg = client_socket.recv(1024).decode("utf8")
             passw = input("room password: ")
             if passw == msg:
-                print(Fore.LIGHTGREEN_EX + 'loged in as ' + my_username + ' seccessfully.')
+                chatS()
+            elif passw == "no*password":
                 chatS()
             elif passw != msg:
-                print("incorrect password!")
+                print(Fore.RED + "incorrect password!")
                 break
         except OSError: 
             print("ok1")
@@ -52,15 +50,24 @@ def receive():
 
 
 def chatS():
+    my_username = input("username: ")
+    username = my_username.encode('utf-8')
+    username_header = f"{len(username):<{HEADER_LENGTH}}".encode('utf-8')
+    client_socket.send(username_header + username)
+    print(Fore.LIGHTGREEN_EX + 'loged in as ' + my_username + ' seccessfully.')
     while True:
         message = input(Fore.WHITE +'[-'+ Fore.CYAN + f'{my_username}' + Fore.WHITE + '-] : ')
         if message == 'exit -y':
             print("goodbye.")
             sys.exit()
-        if message:
-            message = message.encode('utf-8')
-            message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
-            client_socket.send(message_header + message)
+        if len(message) < 200:
+            if message:
+                message = message.encode('utf-8')
+                message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
+                client_socket.send(message_header + message)
+        elif len(message) > 200:
+            print("you can't send messages that are longer than 200 characters")
+            print("your message is " + str(len(message)) + " characters long")
 
         try:
             while True:
