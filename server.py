@@ -47,6 +47,7 @@ def send_message():
         try:
             client, client_address = server_socket.accept()
             client.send(password.encode("utf8"))
+            print("password sent to : " + client_address)
         except:
             print("sending password error!")
 
