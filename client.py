@@ -60,7 +60,7 @@ def chatS():
         if message == 'exit -y':
             print("goodbye.")
             sys.exit()
-        if len(message) < 200:
+        if len(message) <= 200:
             if message:
                 message = message.encode('utf-8')
                 message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
