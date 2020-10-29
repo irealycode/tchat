@@ -11,6 +11,7 @@ host0 = ''
 host1 = ''
 password = ''
 argv = sys.argv[1:]
+
 try:
   opts, args = getopt.getopt(argv,"hH:P:S:",["hfile=","pfile=","sfile"])
 except getopt.GetoptError:
