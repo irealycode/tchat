@@ -44,11 +44,11 @@ print('Listening on ',host0 ,':',host1, '...')
 
 def send_message():
     while True:
-        client, client_address = server_socket.accept()
-        client.send(password.encode("utf8"))
-        ACCEPT_THREAD = Thread(target=chat).start
-
-
+        try:
+            client, client_address = server_socket.accept()
+            client.send(password.encode("utf8"))
+        except:
+            print("sending password error!")
 
 def receive_message(client_socket):
         try:
@@ -62,39 +62,36 @@ def receive_message(client_socket):
         except:
             return False
 
-def chat():
-    while True:
-        read_sockets, _, exception_sockets = select.select(sockets_list, [], sockets_list)
-        for notified_socket in read_sockets:
-            if notified_socket == server_socket:
-                client_socket, client_address = server_socket.accept()
-                user = receive_message(client_socket)
-                if user is False:
-                    continue
-                sockets_list.append(client_socket)
-                clients[client_socket] = user
+while True:
+    read_sockets, _, exception_sockets = select.select(sockets_list, [], sockets_list)
+    for notified_socket in read_sockets:
+        if notified_socket == server_socket:
+            client_socket, client_address = server_socket.accept()
+            client_socket.send(password.encode("utf8"))
+            user = receive_message(client_socket)
+            if user is False:
+                continue
+            sockets_list.append(client_socket)
+            clients[client_socket] = user
 
-                print('new connection from {}:{}, username: {}'.format(*client_address, user['data'].decode('utf-8')))
+            print('new connection from {}:{}, username: {}'.format(*client_address, user['data'].decode('utf-8')))
 
-            else:
-                message = receive_message(notified_socket)
-                if message is False:
-                    print('Closed connection from: {}'.format(clients[notified_socket]['data'].decode('utf-8')))
-                    sockets_list.remove(notified_socket)
-                    del clients[notified_socket]
+        else:
+            message = receive_message(notified_socket)
+            if message is False:
+                print('Closed connection from: {}'.format(clients[notified_socket]['data'].decode('utf-8')))
+                sockets_list.remove(notified_socket)
+                del clients[notified_socket]
 
-                    continue
-                user = clients[notified_socket]
+                continue
+            user = clients[notified_socket]
 
-                print(f'Message from {user["data"].decode("utf-8")}: {message["data"].decode("utf-8")}')
-                for client_socket in clients:
-                    if client_socket != notified_socket:
+            print(f'Message from {user["data"].decode("utf-8")}: {message["data"].decode("utf-8")}')
+            for client_socket in clients:
+                if client_socket != notified_socket:
 
-                        client_socket.send(user['header'] + user['data'] + message['header'] + message['data'])
+                    client_socket.send(user['header'] + user['data'] + message['header'] + message['data'])
 
-        for notified_socket in exception_sockets:
-            sockets_list.remove(notified_socket)
-            del clients[notified_socket]
-if __name__ == "__main__":
-    ACCEPT_THREAD = Thread(target=send_message)
-    ACCEPT_THREAD.start()
+    for notified_socket in exception_sockets:
+        sockets_list.remove(notified_socket)
+        del clients[notified_socket]
