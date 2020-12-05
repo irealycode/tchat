@@ -1,5 +1,5 @@
 # pychat
-python socket chat
+python UDP socket chat
 
 first:
   python server.py -H [HOST] -P [PORT] -S [PASSWORD]
@@ -8,8 +8,8 @@ output:
 
 
 
- last:
-  python server.py -H [HOST] -P [PORT]
- output:
+last:
+  python client.py -H [HOST] -P [PORT]
+output:
   username: [enter your username here]
   room password: [enter the room's password]
