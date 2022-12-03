@@ -26,14 +26,12 @@ except getopt.GetoptError:
   sys.exit(2)
 for opt, arg in opts:
   if opt == '-h':
-     print ('server.py -H <HOST> -P <PORT> -S <PASSWORD>')
+     print ('server.py -H <HOST> -P <PORT>')
      sys.exit()
   elif opt in ("-H", "--hfile"):
      host0 = arg
   elif opt in ("-P", "--pfile"):
      host1 = arg
-  elif opt in ("-S", "--sfile"):
-     password = arg
 
 
 
