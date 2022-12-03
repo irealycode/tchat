@@ -1,4 +1,4 @@
-# pychat
+# tchat
 ### python ```AES256``` encrypted socket chat
 
 #### start server:
