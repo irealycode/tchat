@@ -1,15 +1,23 @@
 # pychat
-python UDP socket chat
+### python ```AES256``` encrypted socket chat
 
-first:
-  python server.py -H [HOST] -P [PORT] -S [PASSWORD]
-output:
+#### start server:
+  ```
+  $ python server.py -H [HOST] -P [PORT]
+  ```
+#### output:
+  ```
   Listening on  [HOST] : [PORT] ...
+  ```
 
 
-
-last:
-  python client.py -H [HOST] -P [PORT]
-output:
+#### connect to server:
+  ```
+  $ python client.py -H [HOST] -P [PORT] -S [PASSWORD]
+  ```
+#### output:
+  ```
   username: [enter your username here]
-  room password: [enter the room's password]
+  ```
+  
+  >still working on it
