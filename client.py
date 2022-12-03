@@ -1,3 +1,4 @@
+import curses
 import socket
 import select
 import errno
@@ -10,6 +11,10 @@ import base64
 from Crypto.Cipher import AES
 from Crypto.Hash import SHA256
 from Crypto import Random
+
+my_username = ''
+messages = []
+
 
 def encrypt(source, key, encode=True):
     key = SHA256.new(key).digest()  
@@ -46,7 +51,7 @@ except getopt.GetoptError:
   sys.exit(2)
 for opt, arg in opts:
   if opt == '-h':
-     print ('client.py -H <HOST> -P <PORT> -S <PASSWORD>')
+     print ('client.py -H <HOST> -P <PORT> -S <KEY>')
      sys.exit()
   elif opt in ("-H", "--hfile"):
      host0 = arg
@@ -58,50 +63,98 @@ for opt, arg in opts:
 HOST = host0
 PORT = int(host1)
 
-try:
-    server_sockets = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server_sockets.connect((HOST, PORT))
-    server_sockets.setblocking(False)
-    my_username = input("username: ")
-    username = my_username.encode('utf-8')
-    username_header = f"{len(username):<{HEADER_LENGTH}}".encode('utf-8')
-    server_sockets.send(username_header + username)
-    print(Fore.LIGHTGREEN_EX + 'logged in as ' + my_username + ' seccessfully.')
-
-    def check_for_msg():
-        while 1:
-            sleep(1)
-            try:
-                username_header = server_sockets.recv(HEADER_LENGTH)
-                if not len(username_header):
-                    print('Connection closed by the server')
-                username_length = int(username_header.decode('utf-8').strip())
-                username = server_sockets.recv(username_length).decode('utf-8')
-                message_header = server_sockets.recv(HEADER_LENGTH)
-                message_length = int(message_header.decode('utf-8').strip())
-                message = server_sockets.recv(message_length).decode('utf-8')
-                message = decrypt(message,password.encode('utf-8')).decode('utf-8')
-                print('\n'+Fore.WHITE + '[-' + Fore.GREEN + f'{username}' + Fore.WHITE + '-] : ' + Fore.YELLOW + f'{message}',end='')
-            except IOError as e:
-                if e.errno != errno.EAGAIN and e.errno != errno.EWOULDBLOCK:
-                    print('Reading error: {}'.format(str(e)))
+def main(stdscr):
+    msg = ''
+    curses.echo()
     
-    t = Thread(target=check_for_msg)
-    t.start()
+    curses.use_default_colors()
+    stdscr.bkgd(curses.COLOR_BLACK)
+    for i in range(0, curses.COLORS):
+        curses.init_pair(i, i, -1);
+    stdscr.nodelay(True)
     while 1:
-        message = input(Fore.WHITE +'[-'+ Fore.CYAN + f'{my_username}' + Fore.WHITE + '-] : ')
-        if message == 'exit -y':
+        # messages.append(['ok','ok'])
+        # check_for_msg()
+        if stdscr.getmaxyx()[0] == len(messages):
+            messages.pop(0)
+        for i in range(len(messages)):
+            stdscr.addstr(i,0,'[-',curses.color_pair(253))
+            clr = ''
+            clr1 = ''
+            if messages[i][0] == my_username:
+                clr = curses.color_pair(38)
+                clr1 = curses.color_pair(253)
+            else:
+                clr = curses.color_pair(83)
+                clr1 = curses.color_pair(178)
+            stdscr.addstr(i,2,f'{messages[i][0]}',clr)
+            stdscr.addstr(i,len(messages[i][0])+2,'-]:',curses.color_pair(253))
+            stdscr.addstr(i,len(messages[i][0])+5,'',)
+            stdscr.addstr(i,len(messages[i][0])+6,messages[i][1],clr1)
+        stdscr.addstr(stdscr.getmaxyx()[0] - 1,0,'[-',curses.color_pair(253))
+        stdscr.addstr(stdscr.getmaxyx()[0] - 1,2,f'{my_username}',curses.color_pair(38))
+        stdscr.addstr(stdscr.getmaxyx()[0] - 1,len(my_username)+2,f'-]: {msg} ',curses.color_pair(253))
+        try:
+            s = stdscr.getkey(stdscr.getmaxyx()[0] - 1,len(my_username)+len(msg)+6)
+            if s != '\n' and 'KEY' not in s:
+                msg = msg + s
+                stdscr.clear()
+            elif s == 'KEY_BACKSPACE':
+                msg = msg[:len(msg)-1]
+                stdscr.clear()
+            elif s == '\n':
+                messages.append([my_username,msg])
+                send_message(msg)
+                msg = ''
+                stdscr.clear()
+            else:
+                pass
+        except:
+            pass
+        # s = stdscr.getstr(stdscr.getmaxyx()[0] - 1,11, 200)
+        stdscr.refresh()
+
+def send_message(message):
+    if message == 'exit -y':
             print(Fore.GREEN + "goodbye." + Fore.RESET)
-        if len(message) <= 200:
-            if message:
-                message = encrypt(message.encode('utf-8'),password.encode('utf-8')).encode('utf-8')
-                message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
-                server_sockets.send(message_header + message)
-        elif len(message) > 200:
-            print("you can't send messages that are longer than 200 characters")
-            print("your message is " + str(len(message)) + " characters long")
+            exit()
+    if len(message) <= 200:
+        if message:
+            message = encrypt(message.encode('utf-8'),password.encode('utf-8')).encode('utf-8')
+            message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
+            server_sockets.send(message_header + message)
+
+def check_for_msg():
+    while 1:
+        sleep(0.7)
+        try:
+            username_header = server_sockets.recv(HEADER_LENGTH)
+            if not len(username_header):
+                print('Connection closed by the server')
+            username_length = int(username_header.decode('utf-8').strip())
+            username = server_sockets.recv(username_length).decode('utf-8')
+            message_header = server_sockets.recv(HEADER_LENGTH)
+            message_length = int(message_header.decode('utf-8').strip())
+            message = server_sockets.recv(message_length).decode('utf-8')
+            message = decrypt(message,password.encode('utf-8')).decode('utf-8')
+            messages.append([username,message])
+        except IOError as e:
+            if e.errno != errno.EAGAIN and e.errno != errno.EWOULDBLOCK:
+                print('Reading error: {}'.format(str(e)))
+
+t = Thread(target=check_for_msg)
+t.start()
+server_sockets = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+server_sockets.connect((HOST, PORT))
+server_sockets.setblocking(False)
+my_username = input("username: ")
+if password == '':
+    password = input('key: ')
+username = my_username.encode('utf-8')
+username_header = f"{len(username):<{HEADER_LENGTH}}".encode('utf-8')
+server_sockets.send(username_header + username)
+print(Fore.LIGHTGREEN_EX + 'logged in as ' + my_username + ' seccessfully.')
 
 
-    
-except:
-    print("error connecing")
+
+curses.wrapper(main)
