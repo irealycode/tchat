@@ -3,7 +3,7 @@
 
 #### start server:
   ```
-  $ python server.py -H [HOST] -P [PORT]
+  $ python3 server.py -H [HOST] -P [PORT]
   ```
 #### output:
   ```
@@ -13,7 +13,7 @@
 
 #### connect to server:
   ```
-  $ python client.py -H [HOST] -P [PORT] -S [PASSWORD]
+  $ python3 client.py -H [HOST] -P [PORT] -S [PASSWORD]
   ```
 #### output:
   ```
