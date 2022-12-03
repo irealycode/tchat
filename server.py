@@ -93,10 +93,19 @@ def serverlisten():
 
 
 
-
+banner="""▄▄▄▄▄ ▄▄·  ▄  .▄ ▄▄▄· ▄▄▄▄▄
+•██  ▐█ ▌ ▪██▪ ▐█▐█ ▀█ •██  
+ ▐█.▪██ ▄▄██▀ ▐█▄█▀▀█  ▐█.▪
+ ▐█▌·▐███▌██▌▐▀▐█  ▪▐▌ ▐█▌·
+ ▀▀▀ ·▀▀▀ ▀▀▀ · ▀    ▀  ▀▀▀ 
+        tchat v1.0
+    made by irealycode
+https://github.com/irealycode
+"""
 try:
     server_socket.bind((HOST, PORT))
     server_socket.listen()
+    print(Fore.BLUE+banner+Fore.RESET)
     print('listening on ' + HOST + ':' + str(PORT) + '...')
     serverlisten()
 except:
