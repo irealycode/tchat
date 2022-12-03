@@ -1,5 +1,5 @@
-# tchat
-### python ```AES256``` encrypted socket chat
+# Tchat
+### python ```AES256``` encrypted sockets based chat
 
 #### start server:
   ```
