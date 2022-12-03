@@ -63,22 +63,33 @@ for opt, arg in opts:
 HOST = host0
 PORT = int(host1)
 
+banner="""▄▄▄▄▄ ▄▄·  ▄  .▄ ▄▄▄· ▄▄▄▄▄
+•██  ▐█ ▌ ▪██▪ ▐█▐█ ▀█ •██  
+ ▐█.▪██ ▄▄██▀ ▐█▄█▀▀█  ▐█.▪
+ ▐█▌·▐███▌██▌▐▀▐█  ▪▐▌ ▐█▌·
+ ▀▀▀ ·▀▀▀ ▀▀▀ · ▀    ▀  ▀▀▀ 
+        tchat v1.0
+    made by irealycode
+https://github.com/irealycode
+"""
+
 def main(stdscr):
     msg = ''
     curses.echo()
-    
     curses.use_default_colors()
     stdscr.bkgd(curses.COLOR_BLACK)
     for i in range(0, curses.COLORS):
         curses.init_pair(i, i, -1);
     stdscr.nodelay(True)
+    
     while 1:
         # messages.append(['ok','ok'])
         # check_for_msg()
-        if stdscr.getmaxyx()[0] == len(messages):
+        stdscr.addstr(0,0,banner,curses.color_pair(69))
+        if stdscr.getmaxyx()[0]-9 == len(messages):
             messages.pop(0)
         for i in range(len(messages)):
-            stdscr.addstr(i,0,'[-',curses.color_pair(253))
+            stdscr.addstr(i+9,0,'[-',curses.color_pair(253))
             clr = ''
             clr1 = ''
             if messages[i][0] == my_username:
@@ -87,10 +98,10 @@ def main(stdscr):
             else:
                 clr = curses.color_pair(83)
                 clr1 = curses.color_pair(178)
-            stdscr.addstr(i,2,f'{messages[i][0]}',clr)
-            stdscr.addstr(i,len(messages[i][0])+2,'-]:',curses.color_pair(253))
-            stdscr.addstr(i,len(messages[i][0])+5,'',)
-            stdscr.addstr(i,len(messages[i][0])+6,messages[i][1],clr1)
+            stdscr.addstr(i+9,2,f'{messages[i][0]}',clr)
+            stdscr.addstr(i+9,len(messages[i][0])+2,'-]:',curses.color_pair(253))
+            stdscr.addstr(i+9,len(messages[i][0])+5,'',)
+            stdscr.addstr(i+9,len(messages[i][0])+6,messages[i][1],clr1)
         stdscr.addstr(stdscr.getmaxyx()[0] - 1,0,'[-',curses.color_pair(253))
         stdscr.addstr(stdscr.getmaxyx()[0] - 1,2,f'{my_username}',curses.color_pair(38))
         stdscr.addstr(stdscr.getmaxyx()[0] - 1,len(my_username)+2,f'-]: {msg} ',curses.color_pair(253))
@@ -103,16 +114,20 @@ def main(stdscr):
                 msg = msg[:len(msg)-1]
                 stdscr.clear()
             elif s == '\n':
-                messages.append([my_username,msg])
-                send_message(msg)
-                msg = ''
-                stdscr.clear()
+                if msg != '' and msg != 'exit -y':
+                    messages.append([my_username,msg])
+                    send_message(msg)
+                    msg = ''
+                    stdscr.clear()
+                elif msg == 'exit -y':
+                    break
             else:
                 pass
         except:
             pass
         # s = stdscr.getstr(stdscr.getmaxyx()[0] - 1,11, 200)
         stdscr.refresh()
+    curses.endwin()
 
 def send_message(message):
     if message == 'exit -y':
@@ -157,4 +172,6 @@ print(Fore.LIGHTGREEN_EX + 'logged in as ' + my_username + ' seccessfully.')
 
 
 
-curses.wrapper(main)
+
+if __name__ == '__main__':
+    curses.wrapper(main)
