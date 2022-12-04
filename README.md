@@ -13,7 +13,7 @@
 
 #### connect to server:
   ```
-  $ python3 client.py -H [HOST] -P [PORT] -S [PASSWORD]
+  $ python3 client.py -H [HOST] -P [PORT] -S [KEY]
   ```
 #### output:
   ```
