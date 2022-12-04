@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+from ast import For
 import curses
 import socket
 import select
@@ -39,10 +41,12 @@ def decrypt(source, key, decode=True):
 
 HEADER_LENGTH = 10
 passcnnect = False
-host0 = ''
-host1 = ''
+host0 = '127.0.0.1'
+host1 = '4242'
 password = ''
 argv = sys.argv[1:]
+exitt = False
+offline = True
 try:
   opts, args = getopt.getopt(argv,"hH:P:S:",["hfile=","pfile=","sfile"])
 except getopt.GetoptError:
@@ -74,6 +78,7 @@ https://github.com/irealycode
 """
 
 def main(stdscr):
+    global exitt
     msg = ''
     curses.echo()
     curses.use_default_colors()
@@ -83,6 +88,10 @@ def main(stdscr):
     stdscr.nodelay(True)
     
     while 1:
+        if my_username == '' or ' ' in my_username:
+            print(Fore.RED + f'cant leave username empty & no spaces'+Fore.RESET)
+            exitt = True
+            break
         # messages.append(['ok','ok'])
         # check_for_msg()
         stdscr.addstr(0,0,banner,curses.color_pair(69))
@@ -120,6 +129,7 @@ def main(stdscr):
                     msg = ''
                     stdscr.clear()
                 elif msg == 'exit -y':
+                    exitt = True
                     break
             else:
                 pass
@@ -141,6 +151,9 @@ def send_message(message):
 
 def check_for_msg():
     while 1:
+        # exit()
+        if exitt:
+            exit()
         sleep(0.7)
         try:
             username_header = server_sockets.recv(HEADER_LENGTH)
@@ -153,25 +166,41 @@ def check_for_msg():
             message = server_sockets.recv(message_length).decode('utf-8')
             message = decrypt(message,password.encode('utf-8')).decode('utf-8')
             messages.append([username,message])
-        except IOError as e:
-            if e.errno != errno.EAGAIN and e.errno != errno.EWOULDBLOCK:
-                print('Reading error: {}'.format(str(e)))
+        except:
+            pass
 
-t = Thread(target=check_for_msg)
-t.start()
-server_sockets = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server_sockets.connect((HOST, PORT))
-server_sockets.setblocking(False)
-my_username = input("username: ")
-if password == '':
-    password = input('key: ')
-username = my_username.encode('utf-8')
-username_header = f"{len(username):<{HEADER_LENGTH}}".encode('utf-8')
-server_sockets.send(username_header + username)
-print(Fore.LIGHTGREEN_EX + 'logged in as ' + my_username + ' seccessfully.')
+try:
+    t = Thread(target=check_for_msg)
+    t.start()
+    try:
 
+        server_sockets = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        server_sockets.connect((HOST, PORT))
+        server_sockets.setblocking(False)
+        offline = False
+        my_username = input("username: ")
+        if password == '':
+            password = input('key: ')
+        if my_username == '' or ' ' in my_username:
+            print(Fore.RED + f'cant leave username empty & no spaces'+Fore.RESET)
+        else:
+            username = my_username.encode('utf-8')
+            username_header = f"{len(username):<{HEADER_LENGTH}}".encode('utf-8')
+            server_sockets.send(username_header + username)
+            print(Fore.LIGHTGREEN_EX + 'logged in as ' + my_username + ' seccessfully.')
+    except:
+        print(Fore.RED + f'server {HOST}:{PORT} is offline'+Fore.RESET)
+except KeyboardInterrupt:
+    print('goodbye.')
+    exitt = True
+    exit()
 
 
 
 if __name__ == '__main__':
-    curses.wrapper(main)
+    try:
+        curses.wrapper(main)
+    except KeyboardInterrupt:
+        print('goodbye.')
+        exitt = True
+        exit()
